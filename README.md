@@ -1,12 +1,9 @@
 ## Current Implementation:
-• Hosted at https://danielkwonwu.github.io/GASTechAbduction/prototype.html for viewing
-• Employee selection to view the GPS data (toggle)
-o Each checkbox makes the GPS coordinates for each employees appear and 
-disappear.
-• Map and road is synced (Integration between Longitude/Latitude and d3 GeoJSON
-projection)
-o The tourist map serves as a synched background to add details of each employees’
-activity within their GPS locations.
+- Hosted at https://danielkwonwu.github.io/GASTechAbduction/prototype.html for viewing
+- Employee selection to view the GPS data (toggle)
+- Each checkbox makes the GPS coordinates for each employees appear and disappear.
+- Map and road is synced (Integration between Longitude/Latitude and d3 GeoJSON projection)
+- The tourist map serves as a synched background to add details of each employees’ activity within their GPS locations.
 ## Schedule: 
 • Individual Milestones:
 o Nigel:
