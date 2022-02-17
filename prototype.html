@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Abila Map</title>
+</head>
+
+<body>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+
+    <div id="container"></div>
+
+    <script>
+        d3.json("Abila.json").then(function (mapData) {
+            var svg = d3.select("body").append("svg")
+                .attr("width", 1700)
+                .attr("height", 1500);
+
+            var abila = topojson.feature(mapData, {
+                type: "GeometryCollection",
+                geometries: mapData.objects.Abila.geometries
+            });
+
+            var projection = d3.geoAlbers()
+                .rotate([335, 0])
+                .fitSize([1200, 800], abila);
+
+            var path = d3.geoPath()
+                .projection(projection);
+
+            svg.append("image")
+                .attr("xlink:href", "MC2-tourist.jpg")
+                .attr("x", 55)
+                .attr("y", -167)
+                .attr("width", 1200)
+                .attr("height", 1000)
+                .attr("transform", 'scale(0.92, 1.2)')
+                .attr("opacity", 0.9);
+
+            var routes = svg.append("g").attr("id", "routes");
+
+            svg.select("#routes")
+                .selectAll("path")
+                .data(topojson.feature(mapData, mapData.objects.Abila).features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .attr("stroke", "brown")
+                .attr("fill", "#ffffff");
+
+            var coordinates = svg.append("g").attr("id", "coordinates");
+
+            //precalculated min/max values
+
+            const long_min = 24.82508806;
+            const long_max = 24.90848537;
+            const lat_min = 36.04802098;
+            const lat_max = 36.08995956;
+
+            function rotated(x, y, degree) {
+                x = (x - long_min) / (long_max - long_min) * 1066
+                y = (y - lat_min) / (lat_max - lat_min) * 667
+                new_x = x * Math.cos(degree * Math.PI / 180) - y * Math.sin(degree * Math.PI / 180)
+                new_y = y * Math.cos(degree * Math.PI / 180) + x * Math.sin(degree * Math.PI / 180)
+                return [new_x, new_y]
+            }
+
+            let degree = 0;
+
+            employees = ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Frente, Vira', 'Campo-Corrente, Ada', 'Borrasca, Isande', 'Vann, Edvard', 'Strum, Orhan',
+                'Cazar, Gustav', 'Flecha, Sven', 'Cocinaro, Hideki', 'Frente, Birgitta', 'Fusil, Stenig', 'Vann, Isia', 'Bergen, Linnea', 'Balas, Felix', 'Onda, Marin',
+                'Alcazar, Lucas', 'Ovan, Bertrand', 'Osvaldo, Hennie', 'Tempestad, Brand', 'Dedos, Lidelse', 'Ferro, Inga', 'Azada, Lars',
+                'Orilla, Kare', 'Calixto, Nils', 'Mies, Minke', 'Nubarron, Adra', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Orilla, Elsa',
+                'Baza, Isak', 'Herrero, Kanon', 'Calzas, Axel', 'Sanjorge Jr., Sten']
+
+            for (let i = 0; i < employees.length; i++) {
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = "checkbox " + employees[i];
+                checkbox.name = employees[i];
+                checkbox.addEventListener('click', function () {
+                    if (document.getElementById("checkbox " + employees[i]).checked) {
+                        d3.csv("gps_full.csv").then(function (gpsData) {
+                            filteredData = gpsData.filter(function (data) {
+                                return data['FullName'] == employees[i];
+                            });
+                            coordinates.selectAll("circle").data(filteredData)
+                                .enter()
+                                .append("circle")
+                                .attr("id", d => d.FullName.replace(", ", ''))
+                                .attr("cx", d => rotated(d.long, d.lat, degree)[0] + 64)
+                                .attr("cy", d => -1 * rotated(d.long, d.lat, degree)[1] + 750)
+                                .attr("r", 1);
+                        });
+                    }
+                    else{
+                        emp_id = ("#"+employees[i]).replace(", ", "");
+                        console.log(emp_id)
+                        svg.selectAll(emp_id).remove()
+                    }
+                });
+
+                var label = document.createElement('label');
+                label.htmlFor = 'employee';
+                label.textContent = employees[i];
+
+                var container = document.getElementById('container');
+                container.appendChild(checkbox);
+                container.appendChild(label);
+                container.appendChild(document.createElement('br'));
+            }
+        });
+    </script>
+</body>
+
+</html>
