@@ -4,20 +4,150 @@
 <head>
     <meta charset="utf-8" />
     <title>Abila Map</title>
+    <style>
+        body{
+            margin:auto;
+        }
+        #menuContainer {
+            max-width: 1200px;
+        }
+
+        .leftnav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .rightnav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            right: 0;
+            background-color: white;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .rightnav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: black;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .rightnav a:hover {
+            color: grey;
+        }
+
+        .rightnav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        .leftnav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: black;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .leftnav a:hover {
+            color: grey;
+        }
+
+        .leftnav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        .openButton {
+            background-color: white;
+        }
+
+        @media screen and (max-height: 450px) {
+            .leftnav {
+                padding-top: 15px;
+            }
+
+            .leftnav a {
+                font-size: 18px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
 
-    <div id="container">
+    <span class="openButton" style="font-size:30px;cursor:pointer; position: fixed; left: 0px; top: 0"
+        onclick="openLeftNav()">&#9776; Date</span>
+
+    <div id="dateLeftNav" class="leftnav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeLeftNav()">&times;</a>
+        <div id="dateContainer">
+        </div>
+    </div>
+    <div id="menuContainer">
+        <div class="openButton" style="font-size:30px;cursor:pointer; position: fixed; left: 1000px; top: 0"
+            onclick="openRightNav()">Employees &#9776; </div>
+        $nbsp;
+        <div id="dateRightNav" class="rightnav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeRightNav()">&times;</a>
+            <div id="employeeContainer">
+            </div>
+        </div>
     </div>
 
+
+
+
+
+
+
     <script>
+
+        document.getElementById("dateRightNav").style.right = (window.screen.width - (window.screen.width - 800)) + "px";
+        function openLeftNav() {
+            document.getElementById("dateLeftNav").style.width = "250px";
+        }
+
+        function closeLeftNav() {
+            document.getElementById("dateLeftNav").style.width = "0";
+        }
+
+        function openRightNav() {
+            document.getElementById("dateRightNav").style.width = "250px";
+        }
+
+        function closeRightNav() {
+            document.getElementById("dateRightNav").style.width = "0";
+        }
+
         d3.json("Abila.json").then(function (mapData) {
             var svg = d3.select("body").append("svg")
-                .attr("width", 1700)
-                .attr("height", 1500);
+                .attr("width", 1200)
+                .attr("height", 800);
 
             var abila = topojson.feature(mapData, {
                 type: "GeometryCollection",
@@ -87,14 +217,14 @@
                 coordinates.selectAll("circle").remove()
                 //iterate over all dates and employees to render the dots
                 //console.log(dates, employees)
-                    
+
                 var max = 0;
                 var min = 19;
-                for (let i = 0; i < dates.length; i++){
-                    if (dates[i] > max){
+                for (let i = 0; i < dates.length; i++) {
+                    if (dates[i] > max) {
                         max = dates[i];
                     }
-                    if (dates[i] < min){
+                    if (dates[i] < min) {
                         min = dates[i];
                     }
                 }
@@ -114,7 +244,7 @@
                         }
                         return flag;
                     });
-                    
+
                     coordinates.selectAll("circle").data(filteredData)
                         .enter()
                         .append("circle")
@@ -123,8 +253,8 @@
                         .attr("cy", d => -1 * rotated(d.long, d.lat, degree)[1] + 750)
                         .attr("r", 1.5)
                         .attr("opacity", 0.4)
-                        .attr("stroke", d => "rgb(" + (255*(employees.indexOf(d.FullName))/employees.length) + "," + (255*(dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2]))))/dates.length) + "," + (255 - (255*(employees.indexOf(d.FullName))/employees.length)) + ")")
-                        .attr("fill", d => "rgb(" + (255*(employees.indexOf(d.FullName))/employees.length) + "," + (255*(dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2]))))/dates.length) + "," + (255 - (255*(employees.indexOf(d.FullName))/employees.length)) + ")");
+                        .attr("stroke", d => "rgb(" + (255 * (employees.indexOf(d.FullName)) / employees.length) + "," + (255 * (dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2])))) / dates.length) + "," + (255 - (255 * (employees.indexOf(d.FullName)) / employees.length)) + ")")
+                        .attr("fill", d => "rgb(" + (255 * (employees.indexOf(d.FullName)) / employees.length) + "," + (255 * (dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2])))) / dates.length) + "," + (255 - (255 * (employees.indexOf(d.FullName)) / employees.length)) + ")");
                 });
             }
 
@@ -147,7 +277,7 @@
                 label.htmlFor = 'date';
                 label.textContent = "2014-01-" + String(i).padStart(2, '0');
 
-                var container = document.getElementById('container');
+                var container = document.getElementById('dateContainer');
                 container.appendChild(checkbox);
                 container.appendChild(label);
                 container.appendChild(document.createElement('br'));
@@ -172,7 +302,7 @@
                 label.htmlFor = 'employee';
                 label.textContent = all_employees[i];
 
-                var container = document.getElementById('container');
+                var container = document.getElementById('employeeContainer');
                 container.appendChild(checkbox);
                 container.appendChild(label);
                 container.appendChild(document.createElement('br'));
