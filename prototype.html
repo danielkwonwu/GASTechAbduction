@@ -5,9 +5,10 @@
     <meta charset="utf-8" />
     <title>Abila Map</title>
     <style>
-        body{
-            margin:auto;
+        body {
+            margin: auto;
         }
+
         #menuContainer {
             max-width: 1200px;
         }
@@ -23,6 +24,7 @@
             overflow-x: hidden;
             transition: 0.5s;
             padding-top: 60px;
+            column-count: 2;
         }
 
         .rightnav {
@@ -101,7 +103,7 @@
     <script src="https://unpkg.com/topojson@3"></script>
 
     <span class="openButton" style="font-size:30px;cursor:pointer; position: fixed; left: 0px; top: 0"
-        onclick="openLeftNav()">&#9776; Date</span>
+        onclick="openLeftNav()">&#9776; Selections</span>
 
     <div id="dateLeftNav" class="leftnav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeLeftNav()">&times;</a>
@@ -110,7 +112,7 @@
     </div>
     <div id="menuContainer">
         <div class="openButton" style="font-size:30px;cursor:pointer; position: fixed; left: 1000px; top: 0"
-            onclick="openRightNav()">Employees &#9776; </div>
+            onclick="openRightNav()">Encounters &#9776; </div>
         $nbsp;
         <div id="dateRightNav" class="rightnav">
             <a href="javascript:void(0)" class="closebtn" onclick="closeRightNav()">&times;</a>
@@ -121,15 +123,11 @@
 
 
 
-
-
-
-
     <script>
 
-        document.getElementById("dateRightNav").style.right = (window.screen.width - (window.screen.width - 800)) + "px";
+        //document.getElementById("dateRightNav").style.right = (window.screen.width - (window.screen.width - 800)) + "px";
         function openLeftNav() {
-            document.getElementById("dateLeftNav").style.width = "250px";
+            document.getElementById("dateLeftNav").style.width = "400px";
         }
 
         function closeLeftNav() {
@@ -200,6 +198,8 @@
 
             let degree = 0;
 
+            all_dates = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+
             rendered_dates = [];
 
             all_employees = ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Frente, Vira', 'Campo-Corrente, Ada', 'Borrasca, Isande', 'Vann, Edvard', 'Strum, Orhan',
@@ -210,6 +210,34 @@
 
             rendered_employees = [];
 
+            //function also called on all changes for encounters
+            function render_encounters() {
+                d3.csv("cc_encounter.csv").then(function(gpsData){
+                    coordinates.selectAll("rect").data(gpsData)
+                    .enter()
+                    .append("rect")
+                    .attr("id", d => {
+                        return "encounter_" + String(d.location).replaceAll(" ",'');
+                    })
+                    .attr("width", 10)
+                    .attr("height", 10)
+                    .attr("x", d => rotated(d.long, d.lat, degree)[0] + 64)
+                    .attr("y", d => -1 * rotated(d.long, d.lat, degree)[1] + 750)
+                    .attr("stroke", "black")
+                    .attr("fill", d => {
+                        if (d.CurrentEmploymentType == d.Encounter_CurrentEmploymentType){
+                            return "red";
+                        }
+                        else{
+                            return "blue";
+                        }
+                    })
+                    .attr("fill-opacity", 0.1)
+                    //.attr("script", "scr")
+                });
+            }
+
+            render_encounters();
 
             //function called on all changes
             function render_circles(dates, employees) {
@@ -258,6 +286,34 @@
                 });
             }
 
+
+            var checkbox_all_date = document.createElement('input');
+                checkbox_all_date.type = 'checkbox';
+                checkbox_all_date.id = "checkbox_all_date"
+                checkbox_all_date.addEventListener('click', function () {
+                    if (!document.getElementById("checkbox_all_date").checked) {
+                        rendered_dates = []
+                        for (let i = 6; i <= 19; i++) {
+                            document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = false;
+                        }
+                    }
+                    else {
+                        rendered_dates = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+                        for (let i = 6; i <= 19; i++) {
+                            document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = true;
+                        }
+                    }
+                    render_circles(rendered_dates, rendered_employees)
+                });
+            var label = document.createElement('label');
+                label.htmlFor = 'date_all';
+                label.textContent = "All Dates";
+
+                var container = document.getElementById('dateContainer');
+                container.appendChild(checkbox_all_date);
+                container.appendChild(label);
+                container.appendChild(document.createElement('br'));
+
             for (let i = 6; i <= 19; i++) {
                 var checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -283,6 +339,47 @@
                 container.appendChild(document.createElement('br'));
             }
 
+            container.appendChild(document.createElement('br'));
+            container.appendChild(document.createElement('br'));
+
+            var checkbox_all_emp = document.createElement('input');
+                checkbox_all_emp.type = 'checkbox';
+                checkbox_all_emp.id = "checkbox_all_emp"
+                checkbox_all_emp.addEventListener('click', function () {
+                    if (!document.getElementById("checkbox_all_emp").checked) {
+                        rendered_employees = []
+                        for (let i = 0; i < all_employees.length; i++) {
+                            document.getElementById("checkbox_" + all_employees[i]).checked = false;
+                        }
+                    }
+                    else {
+                        rendered_employees = ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Frente, Vira', 'Campo-Corrente, Ada', 'Borrasca, Isande', 'Vann, Edvard', 'Strum, Orhan',
+                'Cazar, Gustav', 'Flecha, Sven', 'Cocinaro, Hideki', 'Frente, Birgitta', 'Fusil, Stenig', 'Vann, Isia', 'Bergen, Linnea', 'Balas, Felix', 'Onda, Marin',
+                'Alcazar, Lucas', 'Ovan, Bertrand', 'Osvaldo, Hennie', 'Tempestad, Brand', 'Dedos, Lidelse', 'Ferro, Inga', 'Azada, Lars',
+                'Orilla, Kare', 'Calixto, Nils', 'Mies, Minke', 'Nubarron, Adra', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Orilla, Elsa',
+                'Baza, Isak', 'Herrero, Kanon', 'Calzas, Axel', 'Sanjorge Jr., Sten'];
+                        for (let i = 0; i < all_employees.length; i++) {
+                            document.getElementById("checkbox_" + all_employees[i]).checked = true;
+                        }
+                    }
+                    render_circles(rendered_dates, rendered_employees)
+                });
+            var label = document.createElement('label');
+                label.htmlFor = 'emp_all';
+                label.textContent = "All Employees";
+
+                var container = document.getElementById('dateContainer');
+                container.appendChild(checkbox_all_emp);
+                container.appendChild(label);
+                container.appendChild(document.createElement('br'));
+
+            for (let i = 0; i < 20; i++){
+                container.appendChild(document.createElement('br'));
+            }
+
+            emp_exec = ['Sanjorge Jr., Sten', 'Vasco-Pais, Willem', 'Barranco, Ingrid', 'Strum, Orhan', '']
+            
+
             for (let i = 0; i < all_employees.length; i++) {
                 var checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -302,7 +399,7 @@
                 label.htmlFor = 'employee';
                 label.textContent = all_employees[i];
 
-                var container = document.getElementById('employeeContainer');
+                var container = document.getElementById('dateContainer');
                 container.appendChild(checkbox);
                 container.appendChild(label);
                 container.appendChild(document.createElement('br'));
