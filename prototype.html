@@ -213,7 +213,7 @@
                                 }).forEach(data => {
                                     var entry = document.createElement("div")
                                     entry.className = "encounter-entry"
-                                    entry.textContent = data.timestamp + ": " + data.FullName + " & " + data.Encounter_FullName;
+                                    entry.textContent = data.timestamp + ": " + data.FullName + "(" + String(data.CurrentEmploymentType).substring(0,3) + ") + & " + data.Encounter_FullName  + "(" + String(data.Encounter_CurrentEmploymentType).substring(0,3) + ")";
                                     document.getElementById("encounterContainer").appendChild(entry);
                                     document.getElementById("encounter-title").textContent = "Encounters at " + d.location;
                                 });
