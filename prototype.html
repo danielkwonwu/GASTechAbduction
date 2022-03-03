@@ -127,7 +127,7 @@
 
         //document.getElementById("dateRightNav").style.right = (window.screen.width - (window.screen.width - 800)) + "px";
         function openLeftNav() {
-            document.getElementById("dateLeftNav").style.width = "400px";
+            document.getElementById("dateLeftNav").style.width = "450px";
         }
 
         function closeLeftNav() {
@@ -212,27 +212,27 @@
 
             //function also called on all changes for encounters
             function render_encounters() {
-                d3.csv("cc_encounter.csv").then(function(gpsData){
+                d3.csv("cc_encounter.csv").then(function (gpsData) {
                     coordinates.selectAll("rect").data(gpsData)
-                    .enter()
-                    .append("rect")
-                    .attr("id", d => {
-                        return "encounter_" + String(d.location).replaceAll(" ",'');
-                    })
-                    .attr("width", 10)
-                    .attr("height", 10)
-                    .attr("x", d => rotated(d.long, d.lat, degree)[0] + 64)
-                    .attr("y", d => -1 * rotated(d.long, d.lat, degree)[1] + 750)
-                    .attr("stroke", "black")
-                    .attr("fill", d => {
-                        if (d.CurrentEmploymentType == d.Encounter_CurrentEmploymentType){
-                            return "red";
-                        }
-                        else{
-                            return "blue";
-                        }
-                    })
-                    .attr("fill-opacity", 0.1)
+                        .enter()
+                        .append("rect")
+                        .attr("id", d => {
+                            return "encounter_" + String(d.location).replaceAll(" ", '');
+                        })
+                        .attr("width", 10)
+                        .attr("height", 10)
+                        .attr("x", d => rotated(d.long, d.lat, degree)[0] + 64)
+                        .attr("y", d => -1 * rotated(d.long, d.lat, degree)[1] + 750)
+                        .attr("stroke", "black")
+                        .attr("fill", d => {
+                            if (d.CurrentEmploymentType == d.Encounter_CurrentEmploymentType) {
+                                return "red";
+                            }
+                            else {
+                                return "blue";
+                            }
+                        })
+                        .attr("fill-opacity", 0.1)
                     //.attr("script", "scr")
                 });
             }
@@ -241,6 +241,23 @@
 
             //function called on all changes
             function render_circles(dates, employees) {
+
+                coordinates.append("rect")
+                    .attr("id", "loading")
+                    .attr("x", 500)
+                    .attr("y", 160)
+                    .attr("fill", "white")
+                    .attr("width", 200)
+                    .attr("height", 70)
+                    .attr("fill-opacity", 0.8)
+
+                coordinates.append("text")
+                    .attr("id", "loading")
+                    .attr("x", 510)
+                    .attr("y", 210)
+                    .attr("font-size", "40px")
+                    .attr("color", "black")
+                    .text("Loading....")
                 //remove all circles
                 coordinates.selectAll("circle").remove()
                 //iterate over all dates and employees to render the dots
@@ -283,36 +300,38 @@
                         .attr("opacity", 0.4)
                         .attr("stroke", d => "rgb(" + (255 * (employees.indexOf(d.FullName)) / employees.length) + "," + (255 * (dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2])))) / dates.length) + "," + (255 - (255 * (employees.indexOf(d.FullName)) / employees.length)) + ")")
                         .attr("fill", d => "rgb(" + (255 * (employees.indexOf(d.FullName)) / employees.length) + "," + (255 * (dates.indexOf(String(parseFloat((d.Timestamp).split(" ")[0].split("-")[2])))) / dates.length) + "," + (255 - (255 * (employees.indexOf(d.FullName)) / employees.length)) + ")");
+
+                    coordinates.selectAll("#loading").remove()
                 });
             }
 
 
             var checkbox_all_date = document.createElement('input');
-                checkbox_all_date.type = 'checkbox';
-                checkbox_all_date.id = "checkbox_all_date"
-                checkbox_all_date.addEventListener('click', function () {
-                    if (!document.getElementById("checkbox_all_date").checked) {
-                        rendered_dates = []
-                        for (let i = 6; i <= 19; i++) {
-                            document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = false;
-                        }
+            checkbox_all_date.type = 'checkbox';
+            checkbox_all_date.id = "checkbox_all_date"
+            checkbox_all_date.addEventListener('click', function () {
+                if (!document.getElementById("checkbox_all_date").checked) {
+                    rendered_dates = []
+                    for (let i = 6; i <= 19; i++) {
+                        document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = false;
                     }
-                    else {
-                        rendered_dates = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
-                        for (let i = 6; i <= 19; i++) {
-                            document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = true;
-                        }
+                }
+                else {
+                    rendered_dates = ["06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+                    for (let i = 6; i <= 19; i++) {
+                        document.getElementById("checkbox_" + String(i).padStart(2, '0')).checked = true;
                     }
-                    render_circles(rendered_dates, rendered_employees)
-                });
+                }
+                render_circles(rendered_dates, rendered_employees)
+            });
             var label = document.createElement('label');
-                label.htmlFor = 'date_all';
-                label.textContent = "All Dates";
+            label.htmlFor = 'date_all';
+            label.textContent = "All Dates";
 
-                var container = document.getElementById('dateContainer');
-                container.appendChild(checkbox_all_date);
-                container.appendChild(label);
-                container.appendChild(document.createElement('br'));
+            var container = document.getElementById('dateContainer');
+            container.appendChild(checkbox_all_date);
+            container.appendChild(label);
+            container.appendChild(document.createElement('br'));
 
             for (let i = 6; i <= 19; i++) {
                 var checkbox = document.createElement('input');
@@ -343,50 +362,95 @@
             container.appendChild(document.createElement('br'));
 
             var checkbox_all_emp = document.createElement('input');
-                checkbox_all_emp.type = 'checkbox';
-                checkbox_all_emp.id = "checkbox_all_emp"
-                checkbox_all_emp.addEventListener('click', function () {
-                    if (!document.getElementById("checkbox_all_emp").checked) {
-                        rendered_employees = []
-                        for (let i = 0; i < all_employees.length; i++) {
-                            document.getElementById("checkbox_" + all_employees[i]).checked = false;
-                        }
+            checkbox_all_emp.type = 'checkbox';
+            checkbox_all_emp.id = "checkbox_all_emp"
+            checkbox_all_emp.addEventListener('click', function () {
+                if (!document.getElementById("checkbox_all_emp").checked) {
+                    rendered_employees = []
+                    for (let i = 0; i < all_employees.length; i++) {
+                        document.getElementById("checkbox_" + all_employees[i].replace(" ", "")).checked = false;
+                    }
+                }
+                else {
+                    rendered_employees = ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Frente, Vira', 'Campo-Corrente, Ada', 'Borrasca, Isande', 'Vann, Edvard', 'Strum, Orhan',
+                        'Cazar, Gustav', 'Flecha, Sven', 'Cocinaro, Hideki', 'Frente, Birgitta', 'Fusil, Stenig', 'Vann, Isia', 'Bergen, Linnea', 'Balas, Felix', 'Onda, Marin',
+                        'Alcazar, Lucas', 'Ovan, Bertrand', 'Osvaldo, Hennie', 'Tempestad, Brand', 'Dedos, Lidelse', 'Ferro, Inga', 'Azada, Lars',
+                        'Orilla, Kare', 'Calixto, Nils', 'Mies, Minke', 'Nubarron, Adra', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Orilla, Elsa',
+                        'Baza, Isak', 'Herrero, Kanon', 'Calzas, Axel', 'Sanjorge Jr., Sten'];
+                    for (let i = 0; i < all_employees.length; i++) {
+                        document.getElementById("checkbox_" + all_employees[i].replace(" ", "")).checked = true;
+                    }
+                }
+                render_circles(rendered_dates, rendered_employees)
+            });
+            var label = document.createElement('label');
+            label.htmlFor = 'emp_all';
+            label.textContent = "All Employees";
+
+            var container = document.getElementById('dateContainer');
+            container.appendChild(checkbox_all_emp);
+            container.appendChild(label);
+            container.appendChild(document.createElement('br'));
+
+            
+
+            emp_dept = {'Executive': ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Campo-Corrente, Ada', 'Strum, Orhan', 'Sanjorge Jr., Sten'], 'Engineering': ['Frente, Vira', 'Borrasca, Isande', 'Cazar, Gustav', 'Frente, Birgitta', 'Balas, Felix', 'Onda, Marin', 'Tempestad, Brand', 'Dedos, Lidelse', 'Azada, Lars', 'Orilla, Kare', 'Nubarron, Adra', 'Orilla, Elsa', 'Calzas, Axel'], 'Security': ['Vann, Edvard', 'Cocinaro, Hideki', 'Fusil, Stenig', 'Vann, Isia', 'Osvaldo, Hennie', 'Ferro, Inga', 'Mies, Minke', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Herrero, Kanon'], 'Information Technology': ['Flecha, Sven', 'Bergen, Linnea', 'Alcazar, Lucas', 'Calixto, Nils', 'Baza, Isak'], 'Facilities': ['Ovan, Bertrand']}
+
+            depts = ['Administration', 'Engineering', 'Executive', 'Facilities', 'Information Technology', 'Security']
+
+            for (let j = 0; j < depts.length; j++) {
+                for (let e in emp_dept[depts[j]]){
+                    if (all_employees.indexOf(e) == -1){
+                        console.log(emp_dept[depts[j]][e])
+                    }
+                }
+            }
+
+            container.appendChild(document.createElement('br'));
+
+            for (let j = 0; j < depts.length; j++) {
+                dept = depts[j]
+                var checkbox_dept = document.createElement('input');
+                checkbox_dept.type = 'checkbox';
+                checkbox_dept.id = "checkbox_dept_" + j
+                //console.log(emp_dept[dept].length)
+                checkbox_dept.addEventListener('click', function () {
+                    if (!document.getElementById("checkbox_dept_" + j).checked) {                        
+                        emp_dept[depts[j]].forEach(e => {
+                            rendered_employees.splice(rendered_employees.indexOf(e), 1);
+                            document.getElementById("checkbox_" + e.replace(" ", "")).checked = false;
+                        })
                     }
                     else {
-                        rendered_employees = ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Frente, Vira', 'Campo-Corrente, Ada', 'Borrasca, Isande', 'Vann, Edvard', 'Strum, Orhan',
-                'Cazar, Gustav', 'Flecha, Sven', 'Cocinaro, Hideki', 'Frente, Birgitta', 'Fusil, Stenig', 'Vann, Isia', 'Bergen, Linnea', 'Balas, Felix', 'Onda, Marin',
-                'Alcazar, Lucas', 'Ovan, Bertrand', 'Osvaldo, Hennie', 'Tempestad, Brand', 'Dedos, Lidelse', 'Ferro, Inga', 'Azada, Lars',
-                'Orilla, Kare', 'Calixto, Nils', 'Mies, Minke', 'Nubarron, Adra', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Orilla, Elsa',
-                'Baza, Isak', 'Herrero, Kanon', 'Calzas, Axel', 'Sanjorge Jr., Sten'];
-                        for (let i = 0; i < all_employees.length; i++) {
-                            document.getElementById("checkbox_" + all_employees[i]).checked = true;
-                        }
+                        emp_dept[depts[j]].forEach(e => {
+                            rendered_employees.push(e);
+                            document.getElementById("checkbox_" + e.replace(" ", "")).checked = true;
+                        })
                     }
+                    console.log(rendered_employees)
                     render_circles(rendered_dates, rendered_employees)
                 });
-            var label = document.createElement('label');
-                label.htmlFor = 'emp_all';
-                label.textContent = "All Employees";
+                var label = document.createElement('label');
+                label.htmlFor = 'employee';
+                label.textContent = dept;
 
                 var container = document.getElementById('dateContainer');
-                container.appendChild(checkbox_all_emp);
+                container.appendChild(checkbox_dept);
                 container.appendChild(label);
-                container.appendChild(document.createElement('br'));
-
-            for (let i = 0; i < 20; i++){
                 container.appendChild(document.createElement('br'));
             }
 
-            emp_exec = ['Sanjorge Jr., Sten', 'Vasco-Pais, Willem', 'Barranco, Ingrid', 'Strum, Orhan', '']
-            
+            for (let i = 0; i < 11; i++) {
+                container.appendChild(document.createElement('br'));
+            }
 
             for (let i = 0; i < all_employees.length; i++) {
                 var checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                checkbox.id = "checkbox_" + all_employees[i];
+                checkbox.id = "checkbox_" + all_employees[i].replace(" ", "");
                 checkbox.name = all_employees[i];
                 checkbox.addEventListener('click', function () {
-                    if (document.getElementById("checkbox_" + all_employees[i]).checked) {
+                    if (document.getElementById("checkbox_" + all_employees[i].replace(" ", "")).checked) {
                         rendered_employees.push(all_employees[i]);
                     }
                     else {
