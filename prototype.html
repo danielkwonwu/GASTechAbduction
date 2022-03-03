@@ -29,36 +29,12 @@
 
         .rightnav {
             height: 100%;
-            width: 0;
+            width: 600px;
             position: fixed;
             z-index: 1;
             top: 0;
             right: 0;
             background-color: white;
-            overflow-x: hidden;
-            transition: 0.5s;
-            padding-top: 60px;
-        }
-
-        .rightnav a {
-            padding: 8px 8px 8px 32px;
-            text-decoration: none;
-            font-size: 25px;
-            color: black;
-            display: block;
-            transition: 0.3s;
-        }
-
-        .rightnav a:hover {
-            color: grey;
-        }
-
-        .rightnav .closebtn {
-            position: absolute;
-            top: 0;
-            right: 25px;
-            font-size: 36px;
-            margin-left: 50px;
         }
 
         .leftnav a {
@@ -111,12 +87,9 @@
         </div>
     </div>
     <div id="menuContainer">
-        <div class="openButton" style="font-size:30px;cursor:pointer; position: fixed; left: 1000px; top: 0"
-            onclick="openRightNav()">Encounters &#9776; </div>
-        $nbsp;
         <div id="dateRightNav" class="rightnav">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeRightNav()">&times;</a>
-            <div id="employeeContainer">
+            <h3>Encounters</h3>
+            <div id="encounterContainer" style = "height: 700px; overflow-y: scroll;">
             </div>
         </div>
     </div>
@@ -124,22 +97,12 @@
 
 
     <script>
-
-        //document.getElementById("dateRightNav").style.right = (window.screen.width - (window.screen.width - 800)) + "px";
         function openLeftNav() {
             document.getElementById("dateLeftNav").style.width = "450px";
         }
 
         function closeLeftNav() {
             document.getElementById("dateLeftNav").style.width = "0";
-        }
-
-        function openRightNav() {
-            document.getElementById("dateRightNav").style.width = "250px";
-        }
-
-        function closeRightNav() {
-            document.getElementById("dateRightNav").style.width = "0";
         }
 
         d3.json("Abila.json").then(function (mapData) {
@@ -210,14 +173,18 @@
 
             rendered_employees = [];
 
+            enc_locations = ["Brew've Been Served", 'Hallowed Grounds', 'Coffee Cameleon', 'Bean There Done That', 'Brewed Awakenings', "Jack's Magical Beans", 'Abila Zacharo', 'Kalami Kafenion', 'Hippokampos', "Guy's Gyros", 'Ouzeri Elian', 'Katerina’s Café', 'Gelatogalore', "Frydos Autosupply n' More", "Albert's Fine Clothing", 'Chostus Hotel', "Shoppers' Delight", 'Desafio Golf Course', 'Ahaggo Museum', 'Kronos Mart']
+
+            
+
             //function also called on all changes for encounters
             function render_encounters() {
                 d3.csv("cc_encounter.csv").then(function (gpsData) {
                     coordinates.selectAll("rect").data(gpsData)
                         .enter()
                         .append("rect")
-                        .attr("id", d => {
-                            return "encounter_" + String(d.location).replaceAll(" ", '');
+                        .attr("class", d => {
+                            return "encounter_" + String(d.location).replaceAll(" ", '').replace("'","").replaceAll("’","").replace("é","e");
                         })
                         .attr("width", 10)
                         .attr("height", 10)
@@ -233,6 +200,30 @@
                             }
                         })
                         .attr("fill-opacity", 0.1)
+                        .on("click", (e, d) => {
+
+                            var parent = document.getElementById("encounterContainer")
+
+                            while (parent.firstChild){
+                                parent.removeChild(parent.firstChild);
+                            }
+
+                            
+                            
+                            d3.csv("cc_encounter.csv").then(function (encounter_data) {
+                                
+                                encounter_data.filter(data => {
+                                    return d.location === data.location;
+                                }).forEach(data => {
+                                    var entry = document.createElement("div")
+                                    entry.className = "encounter-entry"
+                                    entry.textContent = data.timestamp + ": " + data.FullName + " & " + data.Encounter_FullName;
+                                    document.getElementById("encounterContainer").appendChild(entry)
+                                });
+                                
+                            });
+
+                        })
                     //.attr("script", "scr")
                 });
             }
@@ -241,7 +232,6 @@
 
             //function called on all changes
             function render_circles(dates, employees) {
-
                 coordinates.append("rect")
                     .attr("id", "loading")
                     .attr("x", 500)
@@ -397,14 +387,6 @@
             emp_dept = {'Executive': ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Campo-Corrente, Ada', 'Strum, Orhan', 'Sanjorge Jr., Sten'], 'Engineering': ['Frente, Vira', 'Borrasca, Isande', 'Cazar, Gustav', 'Frente, Birgitta', 'Balas, Felix', 'Onda, Marin', 'Tempestad, Brand', 'Dedos, Lidelse', 'Azada, Lars', 'Orilla, Kare', 'Nubarron, Adra', 'Orilla, Elsa', 'Calzas, Axel'], 'Security': ['Vann, Edvard', 'Cocinaro, Hideki', 'Fusil, Stenig', 'Vann, Isia', 'Osvaldo, Hennie', 'Ferro, Inga', 'Mies, Minke', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Herrero, Kanon'], 'Information Technology': ['Flecha, Sven', 'Bergen, Linnea', 'Alcazar, Lucas', 'Calixto, Nils', 'Baza, Isak'], 'Facilities': ['Ovan, Bertrand']}
 
             depts = ['Administration', 'Engineering', 'Executive', 'Facilities', 'Information Technology', 'Security']
-
-            for (let j = 0; j < depts.length; j++) {
-                for (let e in emp_dept[depts[j]]){
-                    if (all_employees.indexOf(e) == -1){
-                        console.log(emp_dept[depts[j]][e])
-                    }
-                }
-            }
 
             container.appendChild(document.createElement('br'));
 
