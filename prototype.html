@@ -88,7 +88,7 @@
     </div>
     <div id="menuContainer">
         <div id="dateRightNav" class="rightnav">
-            <h3>Encounters</h3>
+            <h3 id="encounter-title">Encounters</h3>
             <div id="encounterContainer" style = "height: 700px; overflow-y: scroll;">
             </div>
         </div>
@@ -201,24 +201,21 @@
                         })
                         .attr("fill-opacity", 0.1)
                         .on("click", (e, d) => {
-
                             var parent = document.getElementById("encounterContainer")
-
                             while (parent.firstChild){
                                 parent.removeChild(parent.firstChild);
                             }
+                            document.getElementById("encounter-title").textContent = "Encounters"
 
-                            
-                            
                             d3.csv("cc_encounter.csv").then(function (encounter_data) {
-                                
                                 encounter_data.filter(data => {
                                     return d.location === data.location;
                                 }).forEach(data => {
                                     var entry = document.createElement("div")
                                     entry.className = "encounter-entry"
                                     entry.textContent = data.timestamp + ": " + data.FullName + " & " + data.Encounter_FullName;
-                                    document.getElementById("encounterContainer").appendChild(entry)
+                                    document.getElementById("encounterContainer").appendChild(entry);
+                                    document.getElementById("encounter-title").textContent = "Encounters at " + d.location;
                                 });
                                 
                             });
@@ -239,7 +236,7 @@
                     .attr("fill", "white")
                     .attr("width", 200)
                     .attr("height", 70)
-                    .attr("fill-opacity", 0.8)
+                    .attr("fill-opacity", 0.4)
 
                 coordinates.append("text")
                     .attr("id", "loading")
@@ -382,11 +379,10 @@
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
 
-            
 
             emp_dept = {'Executive': ['Vasco-Pais, Willem', 'Barranco, Ingrid', 'Campo-Corrente, Ada', 'Strum, Orhan', 'Sanjorge Jr., Sten'], 'Engineering': ['Frente, Vira', 'Borrasca, Isande', 'Cazar, Gustav', 'Frente, Birgitta', 'Balas, Felix', 'Onda, Marin', 'Tempestad, Brand', 'Dedos, Lidelse', 'Azada, Lars', 'Orilla, Kare', 'Nubarron, Adra', 'Orilla, Elsa', 'Calzas, Axel'], 'Security': ['Vann, Edvard', 'Cocinaro, Hideki', 'Fusil, Stenig', 'Vann, Isia', 'Osvaldo, Hennie', 'Ferro, Inga', 'Mies, Minke', 'Lagos, Varja', 'Resumir, Felix', 'Bodrogi, Loreto', 'Herrero, Kanon'], 'Information Technology': ['Flecha, Sven', 'Bergen, Linnea', 'Alcazar, Lucas', 'Calixto, Nils', 'Baza, Isak'], 'Facilities': ['Ovan, Bertrand']}
 
-            depts = ['Administration', 'Engineering', 'Executive', 'Facilities', 'Information Technology', 'Security']
+            depts = ['Engineering', 'Executive', 'Facilities', 'Information Technology', 'Security']
 
             container.appendChild(document.createElement('br'));
 
@@ -395,7 +391,6 @@
                 var checkbox_dept = document.createElement('input');
                 checkbox_dept.type = 'checkbox';
                 checkbox_dept.id = "checkbox_dept_" + j
-                //console.log(emp_dept[dept].length)
                 checkbox_dept.addEventListener('click', function () {
                     if (!document.getElementById("checkbox_dept_" + j).checked) {                        
                         emp_dept[depts[j]].forEach(e => {
@@ -409,7 +404,6 @@
                             document.getElementById("checkbox_" + e.replace(" ", "")).checked = true;
                         })
                     }
-                    console.log(rendered_employees)
                     render_circles(rendered_dates, rendered_employees)
                 });
                 var label = document.createElement('label');
